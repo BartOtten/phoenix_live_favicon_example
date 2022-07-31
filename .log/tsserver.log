@@ -1,0 +1,18 @@
+Info 0    [00:08:57.522] Starting TS Server
+Info 1    [00:08:57.524] Version: 4.7.4
+Info 2    [00:08:57.524] Arguments: /Users/botten/.asdf/installs/nodejs/18.2.0/bin/node /Users/botten/Development/elixir/libs/phoenix_live_view_favicon/node_modules/typescript/lib/tsserver.js --logFile /Users/botten/Development/elixir/libs/phoenix_live_view_favicon/.log/tsserver.log --logVerbosity info --cancellationPipeName /private/var/folders/gw/rj2wcxbn15340h9_lj_l9vqc0000gn/T/0b0cf1a3b1a203817ef639d5f44e3c59/tscancellation*
+Info 3    [00:08:57.524] Platform: darwin NodeVersion: 18 CaseSensitive: false
+Info 4    [00:08:57.524] ServerMode: undefined syntaxOnly: false hasUnknownServerMode: undefined
+Info 5    [00:08:57.546] Format host information updated
+Info 6    [00:08:57.556] Search path: /Users/botten/Development/elixir/libs/phoenix_live_view_favicon/assets/js
+Info 7    [00:08:57.558] For info: /Users/botten/Development/elixir/libs/phoenix_live_view_favicon/assets/js/app.js :: No config files found.
+Info 8    [00:08:57.563] Starting updateGraphWorker: Project: /dev/null/inferredProject1*
+Info 9    [00:09:00.398] Finishing updateGraphWorker: Project: /dev/null/inferredProject1* Version: 1 structureChanged: true structureIsReused:: Not Elapsed: 2834.4451029896736ms
+Info 10   [00:09:00.398] Project '/dev/null/inferredProject1*' (Inferred)
+Info 11   [00:09:00.398] 	Files (185)
+
+Info 12   [00:09:00.398] -----------------------------------------------
+Info 13   [00:09:03.263] Starting updateGraphWorker: Project: /dev/null/inferredProject1*
+Info 14   [00:09:03.349] Finishing updateGraphWorker: Project: /dev/null/inferredProject1* Version: 2 structureChanged: true structureIsReused:: SafeModules Elapsed: 85.85079401731491ms
+Info 15   [00:09:03.350] Different program with same set of files
+Info 16   [00:09:04.578] Format host information updated
