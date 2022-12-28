@@ -21,7 +21,7 @@ defmodule PhoenixLiveViewFaviconWeb.OtherLive do
     <%= live_patch("Go back", to: "/", class: "button") %>
     <hr>
     <strong>Current link elements</strong>
-    <xmp id="sample"></xmp>
+    <xmp id="sample" phx-update="ignore"></xmp>
     """
   end
 end

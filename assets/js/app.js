@@ -46,7 +46,7 @@ liveSocket.connect()
 window.liveSocket = liveSocket
 
 // listen to hd events and update sample element
-window.addEventListener(`phx:hd`, (e) => {
+window.addEventListener(`phx:hd`, (_e) => {
   favi_code = [...document.querySelectorAll("link[rel*='icon']")].map(x => x.outerHTML).join("\n\n").split(" ").join("\n  ")
   document.getElementById("sample").innerHTML = favi_code
 })
