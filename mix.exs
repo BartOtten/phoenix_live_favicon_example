@@ -7,7 +7,7 @@ defmodule PhoenixLiveViewFavicon.MixProject do
       version: "0.1.0",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:gettext] ++ Mix.compilers(),
+      compilers: extra_compilers() ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -39,10 +39,11 @@ defmodule PhoenixLiveViewFavicon.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, path: "../phoenix_live_view", override: true},
+      {:phoenix_live_view, "~> 0.18.0"},
       {:phoenix_live_favicon, "~> 0.1.0"},
+      {:phoenix_live_head, "~> 0.1.2-rc.1"},
       {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.6"},
+      {:phoenix_live_dashboard, "~> 0.7"},
       {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
       {:telemetry_metrics, "~> 0.6"},
@@ -67,5 +68,12 @@ defmodule PhoenixLiveViewFavicon.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.deploy": ["esbuild default --log-level=debug --minify", "phx.digest"]
     ]
+  end
+
+  defp extra_compilers do
+    case Version.match?(System.version(), "< 1.14.0") do
+      true -> [:gettext]
+      false -> []
+    end
   end
 end
