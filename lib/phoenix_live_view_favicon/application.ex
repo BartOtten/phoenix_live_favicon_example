@@ -9,7 +9,7 @@ defmodule PhoenixLiveViewFavicon.Application do
   def start(_type, _args) do
     children = [
       # Start the Ecto repository
-      PhoenixLiveViewFavicon.Repo,
+      # PhoenixLiveViewFavicon.Repo,
       # Start the Telemetry supervisor
       PhoenixLiveViewFaviconWeb.Telemetry,
       # Start the PubSub system
