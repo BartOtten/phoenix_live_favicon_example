@@ -36,13 +36,14 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
     <button phx-click="base64">Instant Base64</button>
     </div>
     <div class="box">
-    <h3>SVG Favicon Counter</h3>
+    <h3>SVG Message Counter</h3>
     <p>This example uses two saved states ('message' and 'counter') which are set on interaction. When the count is greater than 0, the favicon will switch between them.
     <p><small>An operation to loop states without the server sending switch instructions will me added soon.</small></p>
     </p>
     <!-- also demonstrates how the live view itself is not reset -->
     <button phx-click="decrease" id="counter-decr" attrfoo="no" disabled={@counter < 1} current={@counter}>- 1</button>
     <button phx-click="increase" id="counter-inc" attrfoo="no" current={@counter}>+ 1</button>
+    <button phx-click="mention" id="counter-mention">Got mentioned!</button>
     </div>
     <div class="box">
     <h3>State</h3>
@@ -107,14 +108,13 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
 
     counter = socket.assigns[:counter]
 
-
     socket = 
       if counter == 0 do
       socket
         |> assign(page_title: @pagemap["new_message"])
-        |> Fav.backup(@before_msg)
-        |> Phx.Live.Head.push(".png", :dynamic, :href, "new_message")
-        |> Fav.backup("message")
+        |> Fav.snap(@before_msg)
+        |> Fav.set_dynamic("fav_folder", "new_message")
+        |> Fav.snap("message")
       else
         socket
       end
@@ -122,8 +122,9 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
      socket =  socket
       |> assign(:counter, counter + 1)
       |> Phx.Live.Head.push(".png", :set, :href, "")
-      |> Phx.Live.Head.push(".svg", :dynamic, :href, counter + 1)
-      |> Fav.backup("counter")
+      |> Fav.set_dynamic("counter", counter + 1)
+      |> Fav.set_dynamic("counter_bg", "SteelBlue")
+      |> Fav.snap("counter")
 
     {:noreply, socket}
   end
@@ -143,10 +144,19 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
 
           socket
           |> Phx.Live.Head.push(".png", :set, :href, "")
-          |> Phx.Live.Head.push(".svg", :dynamic, :href, counter - 1)
-          |> Fav.backup("counter")
+          |> Fav.set_dynamic("counter", counter - 1)
+          |> Fav.snap("counter")
           |> assign(:counter, counter - 1)
       end
+
+    {:noreply, socket}
+  end
+  
+  def handle_event("mention", _, socket) do
+    socket =
+      socket
+      |> Fav.set_dynamic("counter_bg", "Crimson")
+      |> Fav.snap("counter")
 
     {:noreply, socket}
   end
@@ -154,7 +164,7 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
   def handle_event("backup", _value, socket) do
     socket =
       socket
-      |> Fav.backup("my_save")
+      |> Fav.snap("my_save")
 
     {:noreply, socket}
   end
@@ -205,7 +215,7 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
     socket =
       socket
       |> assign(page_title: @pagemap[variant])
-      |> Fav.set_dynamic(:href, variant)
+      |> Fav.set_dynamic("fav_folder", variant)
       |> common_actions(value, variant)
 
     {:noreply, socket}
