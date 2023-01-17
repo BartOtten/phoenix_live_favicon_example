@@ -215,6 +215,7 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
     socket =
       socket
       |> assign(page_title: @pagemap[variant])
+      |> Fav.set_attr(:href, "")
       |> Fav.set_dynamic("fav_folder", variant)
       |> common_actions(value, variant)
 
