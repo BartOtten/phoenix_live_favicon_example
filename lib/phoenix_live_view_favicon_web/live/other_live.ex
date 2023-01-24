@@ -5,7 +5,7 @@ defmodule PhoenixLiveViewFaviconWeb.OtherLive do
     ~L"""
     <p>
       The favicons are fully reset due to `on_mount` 
-      including Favicon.reset(socket)    
+      including Favicon.reset()    
     </p>
     <pre>
     def on_mount(:default, _params, _session, socket) do

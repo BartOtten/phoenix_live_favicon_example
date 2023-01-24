@@ -6,10 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="csrf-token" content={csrf_token_value()}>
     <meta property="og:title" content="How to Become an SEO Expert (8 Steps)" />
-    <link rel="icon" type="image/png" sizes="32x32" data-dynamic-href="images/{dynamic}/favicon-32x32.png" class="foo" href={"images/favicon-32x32.png"}>
-    <link rel="icon" type="image/png" sizes="16x16" data-dynamic-href="images/{dynamic}/favicon-16x16.png" class="foo" href={"images/favicon-16x16.png"}>
-
-    <%= live_title_tag assigns[:page_title] || "PhoenixLiveViewFavicon", suffix: " · LivIcon" %>
+    <link rel="icon" type="image/png" sizes="32x32" data-dynamic-href="images/{fav_folder}/favicon-32x32.png" class="png" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" data-dynamic-href="images/{fav_folder}/favicon-16x16.png" class="png" href="images/favicon-16x16.png">
+    <link rel="icon" class="svg" data-dynamic-href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'> 
+    <circle cx='50' cy='50' r='50' fill='{counter_bg}' />
+    <text x='50%' y='50%' dominant-baseline='central' alignment-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='80' fill='white'>
+    {counter}
+    </text> </svg>">
+    <%= live_title_tag assigns[:page_title] || "Phoenix Live Favicon", suffix: " · by Live Favicon" %>
     <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}/>
     <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
   </head>

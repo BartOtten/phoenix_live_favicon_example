@@ -2,6 +2,9 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
   use PhoenixLiveViewFaviconWeb, :live_view
   alias Phx.Live.Favicon, as: Fav
 
+  @tick_time 1000
+  @before_msg "bm"
+
   @pagemap %{
     "initial" => "Initial Fav elem",
     "initial_attr" => "Initial Fav href attr",
@@ -15,32 +18,60 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
 
   def render(assigns) do
     ~H"""
-    <strong>Using {dynamic}</strong><br>
+    <style>
+    .cols{columns: 400px 2; column-rule: dotted 1px; }
+    .box {break-inside: avoid; border-bottom: 1px solid #e3e3e3; margin-bottom: 10px; padding: 1rem}
+    </style>
+    <div class="cols">
+    <div class="box">
+    <h3>Using {dynamic}</h3>
+    <p>Shows how only the dynamic part (green, red, new_message) of a favicon is sent over the wire. The full path is constructed client-side</p>
     <button phx-click="green">Job succeeded</button>
     <button phx-click="red">Job failed</button><br>
     <button phx-click="new_message">New message</button>
-    <br>
-    <strong>Set full value</strong><br>
+    </div>
+    <div class="box">
+    <h3>Set full value</h3>
+    <p>Setting a attributes value is of course as easy as it should be. Here we set an SVG.</p>
     <button phx-click="base64">Instant Base64</button>
-    <br>
-    <strong>Reset</strong><br>
+    </div>
+    <div class="box">
+    <h3>SVG Message Counter</h3>
+    <p>This example uses two saved states ('message' and 'counter') which are set on interaction. When the count is greater than 0, the favicon will switch between them.
+    <p><small>An operation to loop states without the server sending switch instructions will me added soon.</small></p>
+    </p>
+    <!-- also demonstrates how the live view itself is not reset -->
+    <button phx-click="decrease" id="counter-decr" attrfoo="no" disabled={@counter < 1} current={@counter}>- 1</button>
+    <button phx-click="increase" id="counter-inc" attrfoo="no" current={@counter}>+ 1</button>
+    <button phx-click="mention" id="counter-mention">Got mentioned!</button>
+    </div>
+    <div class="box">
+    <h3>State</h3>
+    <p>State can be preserved by making a backup under a given name. This named saved state or a part of it can be restored at any time.</p>
+    <button phx-click="backup">Backup</button>
+    <button phx-click="restore">Restore</button>
+    </div>
+    <div class="box">
+    <h3>Reset to initial</h3>
+    <p>The initial state is saved under key 'orig' when the page is loaded. This allows you to reset to the intial state at any moment.</p>
     <button phx-click="initial_attr">Href attribute only</button>
     <button phx-click="initial">All attributes</button>
-    <br>
-    <strong>Phx Assignment</strong><br>
-    <button phx-click="increase" id="counter" attrfoo="no">Random: <%= @counter %></button>
-    <br>
-    <strong>Test OnMount reset</strong><br>
+    </div>
+    <div class="box">
+    <h3>Test OnMount reset</h3>
+    <p>Using a on_mount-hook including Phx.Live.Favicon.reset/0 will reset the Favicon to it's initial state on page load.</p>
     <%= live_patch("Go to other page", to: "/other") %>
+    </div>
+    </div>
     <hr>
-    <strong>Current link elements</strong>
+    <h3>Current link elements</h3>
     <xmp id="sample" phx-update="ignore"></xmp>
 
     """
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :counter, 1)}
+    {:ok, assign(socket, [counter: 0, timer: make_ref()])}
   end
 
   def handle_params(%{"variant" => variant}, uri, socket) do
@@ -50,17 +81,112 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
 
   def handle_params(_, _, socket), do: {:noreply, socket}
 
+  def handle_info(:flash_counter, socket) do
+    cancel_timer()
+    Process.put(:timer , Process.send_after(self(), :flash_message, @tick_time))
+
+    socket =
+      socket
+      |> Fav.restore("counter")
+
+    {:noreply, socket}
+  end
+
+  def handle_info(:flash_message, socket) do
+    cancel_timer()
+    Process.put(:timer , Process.send_after(self(), :flash_counter, @tick_time))
+
+    socket =
+      socket
+      |> Fav.restore("message")
+
+    {:noreply, socket}
+  end
+
   def handle_event("increase", _, socket) do
-    socket = socket |> assign(counter: Enum.random(1..100))
+    send(self(), :flash_counter)
+
+    counter = socket.assigns[:counter]
+
+    socket = 
+      if counter == 0 do
+      socket
+        |> assign(page_title: @pagemap["new_message"])
+        |> Fav.snap(@before_msg)
+        |> Fav.set_dynamic("fav_folder", "new_message")
+        |> Fav.snap("message")
+      else
+        socket
+      end
+
+     socket =  socket
+      |> assign(:counter, counter + 1)
+      |> Phx.Live.Head.push(".png", :set, :href, "")
+      |> Fav.set_dynamic("counter", counter + 1)
+      |> Fav.set_dynamic("counter_bg", "SteelBlue")
+      |> Fav.snap("counter")
+
+    {:noreply, socket}
+  end
+
+  def handle_event("decrease", _, socket) do
+    counter = socket.assigns[:counter] 
+    socket =
+      case counter do
+        0 -> socket
+        1 -> 
+          cancel_timer()
+
+          socket
+          |> assign(:counter, counter - 1)
+          |> Fav.restore(@before_msg)
+        _ -> 
+
+          socket
+          |> Phx.Live.Head.push(".png", :set, :href, "")
+          |> Fav.set_dynamic("counter", counter - 1)
+          |> Fav.snap("counter")
+          |> assign(:counter, counter - 1)
+      end
+
+    {:noreply, socket}
+  end
+  
+  def handle_event("mention", _, socket) do
+    socket =
+      socket
+      |> Fav.set_dynamic("counter_bg", "Crimson")
+      |> Fav.snap("counter")
+
+    {:noreply, socket}
+  end
+
+  def handle_event("backup", _value, socket) do
+    socket =
+      socket
+      |> Fav.snap("my_save")
+
+    {:noreply, socket}
+  end
+
+  def handle_event("restore", _value, socket) do
+    cancel_timer()
+
+    socket =
+      socket
+      |> Fav.restore("my_save")
+
     {:noreply, socket}
   end
 
   def handle_event("initial" = variant, value, socket) do
+    cancel_timer()
+
     socket =
       socket
       |> assign(page_title: @pagemap[variant])
       |> Fav.reset()
-      |> maybe_push_patch(value, variant)
+      |> common_actions(value, variant)
 
     {:noreply, socket}
   end
@@ -70,7 +196,7 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
       socket
       |> Fav.reset_attr(:href)
       |> assign(page_title: @pagemap[variant])
-      |> maybe_push_patch(value, variant)
+      |> common_actions(value, variant)
 
     {:noreply, socket}
   end
@@ -80,8 +206,7 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
       socket
       |> assign(page_title: @pagemap[variant])
       |> Fav.set_attr(:href, @insta)
-      |> Fav.set_class(variant)
-      |> maybe_push_patch(value, variant)
+      |> common_actions(value, variant)
 
     {:noreply, socket}
   end
@@ -90,24 +215,33 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
     socket =
       socket
       |> assign(page_title: @pagemap[variant])
-      |> Fav.set_dynamic(:href, variant)
-      |> Fav.set_class(variant)
-      |> maybe_push_patch(value, variant)
+      |> Fav.set_attr(:href, "")
+      |> Fav.set_dynamic("fav_folder", variant)
+      |> common_actions(value, variant)
 
     {:noreply, socket}
   end
 
+  def common_actions(socket, value, variant) do
+    cancel_timer()
+
+    socket 
+    |> maybe_push_patch(value, variant)
+  end
+
   def maybe_push_patch(socket, %{uri: uri}, variant) do
     if URI.parse(uri).query == "variant=#{variant}" do
-      socket
+      socket 
     else
-      socket
-      |> push_patch(replace: true, to: "/?variant=#{variant}")
+      push_patch(socket, replace: true, to: "/?variant=#{variant}")
     end
   end
 
   def maybe_push_patch(socket, _, variant) do
-    socket
-    |> push_patch(replace: true, to: "/?variant=#{variant}")
+    push_patch(socket, replace: true, to: "/?variant=#{variant}")
+  end
+
+  def cancel_timer do
+    Process.cancel_timer(Process.get(:timer, make_ref()))
   end
 end
