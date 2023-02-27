@@ -222,11 +222,13 @@ defmodule PhoenixLiveViewFaviconWeb.FaviconLive do
     {:noreply, socket}
   end
 
-  def common_actions(socket, value, variant) do
+  def common_actions(socket, _value, _variant) do
     cancel_timer()
 
     socket 
-    |> maybe_push_patch(value, variant)
+
+    # Causes TypeError: null is not an object (evaluating 'this.main.id')
+    # |> maybe_push_patch(value, variant)
   end
 
   def maybe_push_patch(socket, %{uri: uri}, variant) do
