@@ -45,7 +45,7 @@ defmodule PhoenixLiveViewFaviconWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {PhoenixLiveViewFaviconWeb.LayoutView, "live.html"}
+        layout: {PhoenixLiveViewFaviconWeb.LayoutView, :live}
 
       unquote(view_helpers())
     end
